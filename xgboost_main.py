@@ -8,13 +8,15 @@ from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from timeit import default_timer as timer
 
-
+# Using the features in the dataset, predict if an insurace claim will occur or not.
 def xgboost_classifier(X_train, X_test, Y_train):
 
+    # For training, if the target variable is above 0, convert it to class label "1".
     Y_train = np.where(Y_train > 0, 1, 0)
 
     model = xgb.XGBClassifier(max_depth=20, learning_rate=.15, n_estimators=400)     # 30%
 
+    # Classes are imbalanced (more zeroes than ones), add weight to the ones to offset.
     sw = ((Y_train * 15) - Y_train) + np.ones(len(Y_train))     # 46.7%
 
     model.fit(X_train, Y_train, sample_weight=sw)
@@ -23,7 +25,7 @@ def xgboost_classifier(X_train, X_test, Y_train):
 
     return preds
 
-
+# Predict how much a claim is going to be. 
 def xgboost_regressor(X_train, X_test, Y_train):
 
     model = xgb.XGBRegressor(max_depth=20, learning_rate=0.001)     # 98.56
@@ -34,7 +36,7 @@ def xgboost_regressor(X_train, X_test, Y_train):
 
     return preds
 
-
+# Filter the results by multiplying the results of the classifier with the predictor.
 def run_class_regress(df):
 
     X = df.drop(['ClaimAmount', 'rowIndex'], axis=1)
